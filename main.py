@@ -1,43 +1,36 @@
-#GROUP 5 PROJECT TO AUTONMATE A FAN
-#____________________________________
-#+++++++++++++++++++++++++++++++++++
-#____________________________________
-
-
-#v1. of this code need can currently SENSE the tempreture CHANGES from the DHT and turn on and off based on whether the value exceeds the threshhold tempature value. 
-
-#challenges noted, the time.sleep(2) function, which pings after every two seconds pauses the entire program after the two seconds elapses, meaning it turns off the fan completely losing its core function to be automated and it does not have a communication layer 
-
 import machine
 import dht
 import time
 
-# 1. Setup pins
+# --- Setup ---
 sensor = dht.DHT22(machine.Pin(15))
 fan = machine.Pin(2, machine.Pin.OUT)
 
-# Threshold temperature to turn the fan on
-TEMP_THRESHOLD = 30.0
 
-print("Group 5 Automated Fan System Starting...")
+# Timers (in milliseconds)
+last_sensor_read = 0
+sensor_interval = 5000  # 5 seconds
+
+
+print("Group 5 automated fan starting...")
 
 while True:
-    try:
-        # 2. Measure temperature
-        time.sleep(2) # DHT22 needs a small delay between readings
-        sensor.measure()
-        temp = sensor.temperature()
-        hum = sensor.humidity()
+    current_time = time.ticks_ms()
 
-        print(f"Temp: {temp}°C | Humidity: {hum}%")
-
-        # 3. Logic to control the fan
-        if temp > TEMP_THRESHOLD:
-            fan.value(1) # Turn Fan ON
-            print("Status: FAN ON (Jua imewaka buana!)")
-        else:
-            fan.value(0) # Turn Fan OFF
-            print("Status: FAN OFF")
-
-    except OSError as e:
-        print("Failed to read sensor.")
+    # 1. Non-blocking code update
+    # Check if 2000ms have passed since the last read
+    if time.ticks_diff(current_time, last_sensor_read) >= sensor_interval:
+        try:
+            sensor.measure()
+            temp = sensor.temperature()
+            hum = sensor.humidity()
+            # Fan logic
+            fan.value(1 if temp > 30 else 0)
+            
+            print(f"Temp: {temp}°C | Humidity: {hum}% | Fan: {'ON' if temp > 30 else 'OFF'}")
+            
+            # Reset the timer
+            last_sensor_read = current_time
+            
+        except OSError as e:
+            print("Sensor error!")
