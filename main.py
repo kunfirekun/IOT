@@ -1,3 +1,4 @@
+#ESP32 Temperature Monitoring Program
 import machine
 import dht
 import time
@@ -23,7 +24,7 @@ manual_fan = 0   # State of the Manual overide switch
 auto_fan = 0     # Fan original state
 
 # --- 4. WIFI CONNECTION ---
-print("Connecting to Wokwi-GUEST...")
+print("Group 5 Fan Connecting to Wokwi-GUEST...")
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 wlan.connect("Wokwi-GUEST", "")
@@ -48,7 +49,7 @@ def v3_handler(value):
     manual_fan = int(value[0])
     print(f"Manual Overide Switch is: {'ON' if manual_fan else 'OFF'}")
 
-# --- 6. The program to run the fan starts here with a while loop ---
+# --- 6. Temperature Sensing,Monitoring & data collection Program ---
 print("Group 5 Fan Starting...")
 
 while True:
@@ -66,7 +67,7 @@ while True:
                 auto_fan = 1
             elif temp <= TEMP_OFF:
                 auto_fan = 0
-            # If the data from the sensor is between 28-30, auto_fan stays at its previous state not snap into an OFF state even at readings like 29.9 leaving the room hot. It cools the room a little more until it gets to 28 and below so that it comes at a halt state
+            # If the data from the sensor is between 28-30, auto_fan stays at its previous state
             
             # C. Priority logic (The "OR" Logic)
             # The fan is ON if either the Sensor says so OR the Manual Overide Switch is ON
